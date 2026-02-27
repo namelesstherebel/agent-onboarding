@@ -1,5 +1,9 @@
 # agent-onboarding
 
+```bash
+claude plugin marketplace add namelesstherebel/agent-onboarding && claude plugin install agent-onboarding
+```
+
 Turn any repo into a self-improving agent environment.
 
 ## What It Does
@@ -66,7 +70,11 @@ your-repo/
 
 ## Installation
 
-Add this plugin to your Claude Code environment. Then run `/onboard` in any repo to start.
+```bash
+claude plugin marketplace add namelesstherebel/agent-onboarding && claude plugin install agent-onboarding
+```
+
+Then run `/onboard` in any repo to start.
 
 ## Signal System
 

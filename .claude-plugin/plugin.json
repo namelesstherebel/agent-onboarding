@@ -1,0 +1,56 @@
+{
+  "name": "agent-onboarding",
+  "version": "1.0.0",
+  "description": "Turn any repo into a self-improving agent environment. Guided 7-phase onboarding produces CLAUDE.md, INTENT.md, PROJECT_BRIEF.md, SPEC_INVENTORY.md, and a full SPECS/ directory. Installs a self-improving runtime that tracks friction, logs errors, and generates structured improvement proposals.",
+  "author": "Stefan Kuczynski",
+  "license": "MIT",
+  "homepage": "https://github.com/namelesstherebel/agent-onboarding",
+  "skills": [
+    {
+      "name": "agent-onboarding",
+      "path": "skills/agent-onboarding/SKILL.md",
+      "description": "Onboard any repo into a fully specified, self-improving agent environment"
+    }
+  ],
+  "commands": [
+    {
+      "name": "onboard",
+      "path": "commands/onboard.md",
+      "description": "Start or resume the 7-phase agent onboarding workflow"
+    },
+    {
+      "name": "review",
+      "path": "commands/review.md",
+      "description": "Review pending improvement proposals from the runtime"
+    },
+    {
+      "name": "reflect",
+      "path": "commands/reflect.md",
+      "description": "Trigger a friction review and generate improvement proposals"
+    },
+    {
+      "name": "status",
+      "path": "commands/status.md",
+      "description": "Report environment health, spec coverage, and open proposals"
+    }
+  ],
+  "agents": [
+    {
+      "name": "onboarding-agent",
+      "path": "agents/onboarding-agent.md",
+      "description": "Autonomous agent that executes the onboarding workflow and runtime operations"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "RUNTIME.md",
+      "path": "RUNTIME.md",
+      "description": "Self-improving runtime — installed into target repo during onboarding"
+    },
+    {
+      "name": "IMPROVEMENT_QUEUE.md",
+      "path": "IMPROVEMENT_QUEUE.md",
+      "description": "Proposal queue template — installed into target repo during onboarding"
+    }
+  ]
+}

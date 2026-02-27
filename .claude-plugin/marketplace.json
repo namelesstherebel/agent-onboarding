@@ -1,0 +1,14 @@
+{
+    "name": "agent-onboarding",
+    "description": "Turn any repo into a self-improving agent environment.",
+    "plugins": [
+          {
+                  "name": "agent-onboarding",
+                  "description": "Turn any repo into a self-improving agent environment. Guided 7-phase onboarding produces CLAUDE.md, INTENT.md, PROJECT_BRIEF.md, SPEC_INVENTORY.md, and a full SPECS/ directory. Installs a self-improving runtime that tracks friction, logs errors, and generates structured improvement proposals.",
+                  "source": {
+                            "type": "github",
+                            "repo": "namelesstherebel/agent-onboarding"
+                  }
+          }
+    ]
+}

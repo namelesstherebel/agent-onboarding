@@ -2,6 +2,14 @@
 
 Turn any repo into a self-improving agent environment.
 
+## Quick Install
+
+```bash
+claude install github:namelesstherebel/agent-onboarding
+```
+
+Then run `/onboard` in any repo to start.
+
 ## What It Does
 
 This Claude Code plugin has two layers that work together:
@@ -63,10 +71,6 @@ your-repo/
 3. **Human review** — proposals accumulate in `IMPROVEMENT_QUEUE.md`. Nothing changes until you run `/review` and approve. `INTENT.md` changes require explicit confirmation.
 
 4. **Versioned specs** — every approved change increments the spec version with a traceable history of what changed and why.
-
-## Installation
-
-Add this plugin to your Claude Code environment. Then run `/onboard` in any repo to start.
 
 ## Signal System
 

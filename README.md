@@ -25,7 +25,7 @@ You should see `agent-onboarding` with status `installed`. If it is not listed, 
 Open Claude Code in the repo you want to set up. If `*onboard` works, use it. If Claude doesn't recognize it, paste this prompt:
 
 ```
-Run the agent-onboarding workflow. Read the plugin's commands/onboard.md and execute the full 7-phase onboarding process for this repository.
+Run the agent-onboarding workflow. Read the plugin's commands*onboard.md and execute the full 7-phase onboarding process for this repository.
 ```
 
 ---

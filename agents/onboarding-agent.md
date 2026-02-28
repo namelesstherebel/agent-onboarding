@@ -52,7 +52,7 @@ After onboarding is complete, follow the runtime protocol defined in `RUNTIME.md
 - Track friction silently during task execution
 - Log errors to `LOGS/errors/` immediately when they occur
 - Generate proposals when friction threshold is met
-- Respond to `/review`, `/reflect`, and `/status` commands
+- Respond to `*review`, `*reflect`, and `*status` commands
 
 ## State Management
 
@@ -64,8 +64,8 @@ Always maintain `ONBOARDING_STATE.md` so sessions can resume cleanly:
 
 ## Constraints
 
-- Never modify `INTENT.md` without explicit human approval via `/review`
-- Never auto-apply improvement proposals — always go through `/review`
+- Never modify `INTENT.md` without explicit human approval via `*review`
+- Never auto-apply improvement proposals — always go through `*review`
 - Never skip the existing repo analysis for repos with content
 - Never advance phases without user confirmation
 - Never generate proposals for one-off errors — only structural gaps or patterns

@@ -1,10 +1,34 @@
 # agent-onboarding
 
+Turn any repo into a self-improving agent environment.
+
+---
+
+## Quick Install
+
+**1. Install the plugin** — run this in your terminal:
+
 ```bash
 claude plugin marketplace add namelesstherebel/agent-onboarding && claude plugin install agent-onboarding
 ```
 
-Turn any repo into a self-improving agent environment.
+**2. Confirm it's installed** — run:
+
+```bash
+claude plugin list
+```
+
+You should see `agent-onboarding` with status `installed`. If it's not listed, re-run the install command above.
+
+**3. Confirm the commands are registered** — open Claude Code and type `/` in the chat input. You should see `/onboard`, `/review`, `/reflect`, and `/status` in the list. If they don't appear, restart your Claude Code session (close and reopen the window), then check again.
+
+**4. Run onboarding** — navigate to the repo you want to set up, open Claude Code in that directory, and type:
+
+```
+/onboard
+```
+
+That's it. The agent handles the rest.
 
 ---
 
@@ -29,9 +53,9 @@ This Claude Code plugin has two layers that work together:
 
 ---
 
-## Installation
+## Full Setup and Verification Guide
 
-### Step 1 — Install the plugin
+### Install the plugin
 
 ```bash
 claude plugin marketplace add namelesstherebel/agent-onboarding && claude plugin install agent-onboarding
@@ -45,112 +69,141 @@ claude plugin marketplace add namelesstherebel/agent-onboarding
 claude plugin install agent-onboarding
 ```
 
-### Step 2 — Verify the commands are registered
+### Confirm the plugin is installed
 
-After installation, open Claude Code and check that the plugin commands are available. Type `/` in the chat input — you should see `/onboard`, `/review`, `/reflect`, and `/status` listed.
+```bash
+claude plugin list
+# Expected output includes:
+# agent-onboarding   1.0.0   installed
+```
 
-If the commands don't appear:
-- Restart your Claude Code session (close and reopen the window)
-- - If still missing, run `claude plugin list` in your terminal to confirm `agent-onboarding` shows as installed
- 
-  - ### Step 3 — Run onboarding in a repo
- 
-  - Navigate to the repo you want to set up, open Claude Code, and run:
- 
-  - ```
-    /onboard
-    ```
+If `agent-onboarding` doesn't appear, re-run the install command.
 
-    The agent will read your codebase first, then guide you through 7 phases. At any point you can type `pause` to save progress and resume later, or `skip` to accept placeholder values for a phase and move on.
+### Confirm the commands are registered in Claude Code
 
-    **What a successful onboarding produces:**
+Open Claude Code and type `/` in the chat input. You should see:
 
-    ```
-    your-repo/
-    ├── CLAUDE.md             ← Agent context (stack, conventions, tools)
-    ├── INTENT.md             ← Agent intent (goals, trade-offs, escalation rules)
-    ├── PROJECT_BRIEF.md      ← Project overview
-    ├── SPEC_INVENTORY.md     ← Task inventory and spec queue
-    ├── RUNTIME.md            ← Self-improving runtime
-    ├── IMPROVEMENT_QUEUE.md  ← Proposal queue
-    ├── ONBOARDING_STATE.md   ← Onboarding progress tracker
-    ├── CONTEXT/              ← Reference docs the agent always loads
-    ├── SPECS/                ← Agent-executable specifications
-    │   └── [task-name].md
-    └── LOGS/
-        ├── sessions/         ← Agent session logs
-        └── errors/           ← Error logs
-    ```
+- `/onboard`
+- - `/review`
+  - - `/reflect`
+    - - `/status`
+     
+      - If the commands don't appear after installation:
+     
+      - 1. Restart your Claude Code session (close and reopen the window)
+        2. 2. Type `/` again and check the list
+           3. 3. If still missing, run `claude plugin list` in your terminal to confirm the plugin is installed, then reinstall
+             
+              4. ### Run onboarding in a repo
+             
+              5. Open Claude Code in the repo you want to set up and run:
+             
+              6. ```
+                 /onboard
+                 ```
 
-    ### Step 4 — Verify the runtime is working
+                 The agent reads your codebase first, then walks you through 7 phases. Control the flow at any time:
 
-    After onboarding completes, run any task in that repo. At the end of the task, the agent should automatically surface a completion notice like this:
+                 - Type `pause` to save progress and stop cleanly
+                 - - Type `skip` to accept placeholder values for the current phase and move on
+                   - - Type `back` to return to the previous phase
+                    
+                     - What a successful onboarding produces:
+                    
+                     - ```
+                       your-repo/
+                       ├── CLAUDE.md             <- Agent context (stack, conventions, tools)
+                       ├── INTENT.md             <- Agent intent (goals, trade-offs, escalation rules)
+                       ├── PROJECT_BRIEF.md      <- Project overview
+                       ├── SPEC_INVENTORY.md     <- Task inventory and spec queue
+                       ├── RUNTIME.md            <- Self-improving runtime (installed by Phase 5)
+                       ├── IMPROVEMENT_QUEUE.md  <- Proposal queue
+                       ├── ONBOARDING_STATE.md   <- Onboarding progress tracker
+                       ├── CONTEXT/              <- Reference docs the agent always loads
+                       ├── SPECS/                <- Agent-executable specifications
+                       │   └── [task-name].md
+                       └── LOGS/
+                           ├── sessions/         <- Agent session logs
+                           └── errors/           <- Error logs
+                       ```
 
-    > **Task complete.**
-    > >
-    > >> [Summary of what was done.]
-    > >> >
-    > >> >> 📋 **Review queue has 2 pending proposal(s).** 2 new proposal(s) were added this session. Run `/review` to approve, reject, or modify — nothing changes until you do.
-    > >> >>
-    > >> >> Or if no proposals were generated:
-    > >> >>
-    > >> >> > ✅ **Improvement queue is clean.** No proposals pending.
-    > >> >> >
-    > >> >> > If you're not seeing this notice after tasks, check that `RUNTIME.md` exists in your repo root. If it's missing, re-run `/onboard` — Phase 5 (Environment Build) installs it.
-    > >> >> >
-    > >> >> > ### Step 5 — Review your first proposals
-    > >> >> >
-    > >> >> > Run `/review` after your first task to see what the agent flagged. Each proposal shows:
-    > >> >> > - What caused it (friction type or error)
-    > >> >> > - - Which artifact it proposes to change
-    > >> >> >   - - The exact change, written out
-    > >> >> >     - - Confidence level and whether it needs a judgment call from you
-    > >> >> >      
-    > >> >> >       - Respond with `APPROVE`, `REJECT`, or `MODIFY` for each one. Nothing changes in your repo until you approve.
-    > >> >> >      
-    > >> >> >       - ---
-    > >> >> >
-    > >> >> > ## How the Runtime Works
-    > >> >> >
-    > >> >> > 1. **Friction detection** — the agent tracks every moment it had to guess, backtrack, or make an assumption. When friction exceeds the threshold in `INTENT.md`, it generates a structured proposal targeting the root cause.
-    > >> >> >
-    > >> >> > 2. 2. **Error logging** — unexpected errors get logged immediately and, if they reveal a structural gap, trigger a proposal.
-    > >> >> >   
-    > >> >> >    3. 3. **Human review** — proposals accumulate in `IMPROVEMENT_QUEUE.md`. Nothing changes until you run `/review` and approve. `INTENT.md` changes require explicit confirmation.
-    > >> >> >      
-    > >> >> >       4. 4. **Versioned specs** — every approved change increments the spec version with a traceable history of what changed and why.
-    > >> >> >         
-    > >> >> >          5. ---
-    > >> >> >         
-    > >> >> >          6. ## Onboarding Phases
-    > >> >> >         
-    > >> >> >          7. | Phase | Name | Produces |
-    > >> >> > |---|---|---|
-    > >> >> > | 1 | Project Discovery | `PROJECT_BRIEF.md` |
-    > >> >> > | 2 | Context Engineering | `CLAUDE.md`, `CONTEXT/` |
-    > >> >> > | 3 | Intent Engineering | `INTENT.md` |
-    > >> >> > | 4 | Specification Readiness | `SPEC_INVENTORY.md` |
-    > >> >> > | 5 | Environment Build | File structure, dependencies, runtime |
-    > >> >> > | 6 | Specification Writing | `SPECS/*.md` |
-    > >> >> > | 7 | Verify & Launch | Validation, handoff to runtime |
-    > >> >> >
-    > >> >> > For existing repos, the workflow reads your codebase first and leads with what it found — it only asks about gaps.
-    > >> >> >
-    > >> >> > ---
-    > >> >> >
-    > >> >> > ## Signal System
-    > >> >> >
-    > >> >> > During onboarding, control the flow:
-    > >> >> >
-    > >> >> > | Signal | Action |
-    > >> >> > |---|---|
-    > >> >> > | `ready` / `next` | Advance to next phase |
-    > >> >> > | `skip` | Accept placeholders, advance |
-    > >> >> > | `pause` | Save progress, stop cleanly |
-    > >> >> > | `back` | Return to previous phase |
-    > >> >> >
-    > >> >> > ---
-    > >> >> >
-    > >> >> > ## License
-    > >> >> >
-    > >> >> > MIT — Copyright (c) 2026 Stefan Kuczynski
+                       ### Confirm the runtime is working
+
+                       After onboarding, run any task in the repo. At the end of the task, the agent must surface a completion notice. If there are pending proposals:
+
+                       ```
+                       Task complete.
+                       [Summary of what was done.]
+
+                       📋 Review queue has 2 pending proposal(s). 2 new proposal(s) were added this session.
+                       Run /review to approve, reject, or modify — nothing changes until you do.
+                       ```
+
+                       If the queue is clean:
+
+                       ```
+                       Task complete.
+                       [Summary of what was done.]
+
+                       ✅ Improvement queue is clean. No proposals pending.
+                       ```
+
+                       If you are not seeing this notice after tasks, check that `RUNTIME.md` exists in your repo root. If it is missing, re-run `/onboard` — Phase 5 (Environment Build) installs it.
+
+                       ### Review your first proposals
+
+                       Run `/review` after your first task. Each proposal shows:
+
+                       - What triggered it (friction type or error)
+                       - - Which artifact it proposes to change
+                         - - The exact change, written out
+                           - - Confidence level and whether it needs a judgment call from you
+                            
+                             - Respond with `APPROVE`, `REJECT`, or `MODIFY` for each one. Nothing changes in your repo until you approve.
+                            
+                             - ---
+
+                             ## How the Runtime Works
+
+                             1. **Friction detection** — the agent tracks every moment it had to guess, backtrack, or make an assumption. When friction exceeds the threshold in `INTENT.md`, it generates a structured proposal targeting the root cause.
+                            
+                             2. 2. **Error logging** — unexpected errors get logged immediately and, if they reveal a structural gap, trigger a proposal.
+                               
+                                3. 3. **Human review** — proposals accumulate in `IMPROVEMENT_QUEUE.md`. Nothing changes until you run `/review` and approve. `INTENT.md` changes require explicit confirmation.
+                                  
+                                   4. 4. **Versioned specs** — every approved change increments the spec version with a traceable history of what changed and why.
+                                     
+                                      5. ---
+                                     
+                                      6. ## Onboarding Phases
+                                     
+                                      7. | Phase | Name | Produces |
+                                      8. |---|---|---|
+                                      9. | 1 | Project Discovery | `PROJECT_BRIEF.md` |
+                                      10. | 2 | Context Engineering | `CLAUDE.md`, `CONTEXT/` |
+                                      11. | 3 | Intent Engineering | `INTENT.md` |
+                                      12. | 4 | Specification Readiness | `SPEC_INVENTORY.md` |
+                                      13. | 5 | Environment Build | File structure, dependencies, runtime |
+                                      14. | 6 | Specification Writing | `SPECS/*.md` |
+                                      15. | 7 | Verify & Launch | Validation, handoff to runtime |
+                                     
+                                      16. For existing repos, the workflow reads your codebase first and leads with what it found — it only asks about gaps.
+                                     
+                                      17. ---
+                                     
+                                      18. ## Signal System
+                                     
+                                      19. During onboarding, control the flow:
+                                     
+                                      20. | Signal | Action |
+                                      21. |---|---|
+                                      22. | `ready` / `next` | Advance to next phase |
+                                      23. | `skip` | Accept placeholders, advance |
+                                      24. | `pause` | Save progress, stop cleanly |
+                                      25. | `back` | Return to previous phase |
+                                     
+                                      26. ---
+                                     
+                                      27. ## License
+                                     
+                                      28. MIT — Copyright (c) 2026 Stefan Kuczynski

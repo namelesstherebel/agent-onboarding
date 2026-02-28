@@ -72,8 +72,10 @@ If the user is onboarding an existing repo, read the environment before intervie
 4. Read: any existing `.md` files at root level
 5. Check for: existing `CLAUDE.md`, `INTENT.md`, `specs/`, `CONTEXT/` — note what's already done
 6. Check for: `.env.example`, `docker-compose.yml`, `Makefile` — infer the stack
-7. Check for: existing tests, CI config — infer quality standards
-8. Summarize what you learned before asking anything
+7. Check for: memory or RAG infrastructure — directories like `vector-store/`, `embeddings/`, `memory/`; config files for Pinecone, Chroma, Weaviate, FAISS, LlamaIndex, LangChain, or similar — note what's present
+8. Check for: special dependency manifests beyond standard package files — `Modelfile`, `*.llamafile`, custom model configs, ML framework configs, or unusual lock files
+9. Check for: existing tests, CI config — infer quality standards
+10. Summarize what you learned before asking anything
 
 Present a brief **"Here's what I found"** summary to the user. Fill in what you already know. Only ask about gaps. This respects their time and demonstrates you're working *with* them, not interrogating them.
 
@@ -99,7 +101,8 @@ Then fill gaps with targeted questions. Don't re-ask what the code already answe
 4. What does "working" look like? What's the definition of done?
 5. What is this explicitly *not* doing? Where is the scope boundary?
 6. Are there hard constraints — tech stack, timeline, compliance, budget?
-7. (Existing repos only) What's broken, incomplete, or undocumented that we should fix during onboarding?
+7. Are there special dependencies, memory systems, or RAG infrastructure that are vital to the workflow? (e.g., a vector database, embedding pipeline, external memory store, fine-tuned model, or retrieval layer — anything the agent cannot function without that wouldn't be obvious from standard dependency files)
+8. (Existing repos only) What's broken, incomplete, or undocumented that we should fix during onboarding?
 
 **Produce `PROJECT_BRIEF.md`:**
 
@@ -153,9 +156,10 @@ For existing repos: much of this may already be inferable. Read the codebase bef
 4. What's the full tech stack?
 5. What are recurring input types the agent receives?
 6. Is there domain-specific vocabulary the agent needs?
-7. What does agent memory look like — session-only, persistent, file-based, RAG?
-8. What should the agent re-check at the start of each session?
-9. (Existing repos) Are there undocumented conventions the agent should know about?
+7. What does agent memory look like — session-only, persistent, file-based, or RAG? If RAG: what's the data source, embedding model, vector store, and retrieval strategy?
+8. Are there special dependencies vital to the workflow that aren't captured in standard package files? (e.g., a custom vector DB, a proprietary embedding service, a self-hosted model, or external memory infrastructure)
+9. What should the agent re-check at the start of each session?
+10. (Existing repos) Are there undocumented conventions the agent should know about?
 
 **Produce `CLAUDE.md`:**
 

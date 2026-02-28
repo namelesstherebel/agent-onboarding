@@ -1,4 +1,4 @@
-# /reflect
+# *reflect
 
 Manually trigger a friction review and generate improvement proposals.
 
@@ -21,7 +21,7 @@ Manually trigger a friction review and generate improvement proposals.
 5. **Report to user:**
 
 ```
-Reflected on [N] tasks since last review. Generated [N] proposals. Use /review to see them.
+Reflected on [N] tasks since last review. Generated [N] proposals. Use *review to see them.
 ```
 
 If no friction met the threshold:
@@ -40,5 +40,5 @@ Reflected on [N] tasks since last review. No proposals generated — friction be
 ## Important
 
 - Reflection does not auto-apply changes. It only generates proposals.
-- All proposals go through `/review` before any artifacts are modified.
+- All proposals go through `*review` before any artifacts are modified.
 - Do not generate proposals for one-off errors — only structural gaps or patterns.

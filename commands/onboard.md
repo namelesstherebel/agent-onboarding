@@ -1,4 +1,4 @@
-# /onboard
+# *onboard
 
 Start or resume the agent onboarding workflow for this repository.
 
@@ -10,7 +10,7 @@ When invoked, determine the current state:
 
 2. **`ONBOARDING_STATE.md` exists with `Status: In Progress`** — Resume from the recorded phase and next action. Do not re-ask questions that have already been answered.
 
-3. **`ONBOARDING_STATE.md` exists with `Status: Complete`** — Report that onboarding is already complete. Suggest `/status` to check environment health or offer to re-run specific phases if the user wants to update artifacts.
+3. **`ONBOARDING_STATE.md` exists with `Status: Complete`** — Report that onboarding is already complete. Suggest `*status` to check environment health or offer to re-run specific phases if the user wants to update artifacts.
 
 ## Workflow
 

@@ -22,7 +22,11 @@ You should see `agent-onboarding` with status `installed`. If it is not listed, 
 
 **3. Run onboarding**
 
-Open Claude Code in the repo you want to set up and type `*onboard`. The agent handles the rest.
+Open Claude Code in the repo you want to set up. If `*onboard` works, use it. If Claude doesn't recognize it, paste this prompt:
+
+```
+Run the agent-onboarding workflow. Read the plugin's commands/onboard.md and execute the full 7-phase onboarding process for this repository.
+```
 
 ---
 
@@ -38,7 +42,7 @@ Open Claude Code in the repo you want to set up and type `*onboard`. The agent h
 
 ## Commands
 
-These are star commands. Type them directly in Claude Code — no slash, no menu needed.
+These are star commands. Type them in Claude Code once the plugin is installed.
 
 | Command | What it does |
 |---------|-------------|
@@ -47,7 +51,7 @@ These are star commands. Type them directly in Claude Code — no slash, no menu
 | `*reflect` | Manually trigger a friction review and proposal generation |
 | `*status` | Report environment health: spec coverage, open proposals, last activity |
 
-Star commands work because the plugin installs a `CLAUDE.md` into your Claude Code context that defines each command. When you type `*onboard`, Claude reads the definition and executes the workflow.
+Star commands work because the plugin provides a `CLAUDE.md` that Claude Code loads into context. If `*onboard` doesn't fire immediately, use the fallback prompt above — it produces the same result.
 
 ---
 

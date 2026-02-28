@@ -52,9 +52,9 @@ If both conditions exist (runtime installed but onboarding state file shows inco
 | `"skip"` | Accept placeholders, advance |
 | `"pause"` | Write `ONBOARDING_STATE.md`, stop cleanly |
 | `"back"` | Return to previous phase |
-| `/review` | Surface `IMPROVEMENT_QUEUE.md` for human review |
-| `/reflect` | Manually trigger a reflection and proposal generation |
-| `/status` | Report environment health — spec coverage, open proposals, last audit |
+| `*review` | Surface `IMPROVEMENT_QUEUE.md` for human review |
+| `*reflect` | Manually trigger a reflection and proposal generation |
+| `*status` | Report environment health — spec coverage, open proposals, last audit |
 
 ---
 
@@ -225,7 +225,7 @@ For existing repos: look for implicit intent in existing docs, commit messages, 
 ```markdown
 # Agent Intent — [Project Name]
 *Last updated: [date]*
-*⚠️ Changes to this file require explicit human review and approval via /review*
+*⚠️ Changes to this file require explicit human review and approval via *review*
 
 ## Primary Goal
 [What the agent is fundamentally optimizing for — one sentence]
@@ -519,7 +519,7 @@ When an unexpected error occurs:
 2. Evaluate whether to stop and escalate or log and continue based on `INTENT.md` uncertainty protocol
 3. If the error indicates a structural gap: generate an improvement proposal
 
-## /reflect Command
+## *reflect Command
 
 When triggered manually or at natural task completion checkpoints:
 
@@ -527,9 +527,9 @@ When triggered manually or at natural task completion checkpoints:
 2. Review any new error logs
 3. Evaluate against friction threshold in `INTENT.md`
 4. Generate proposals for anything that meets the threshold
-5. Report to user: *"Reflected on [N] tasks. Generated [N] proposals. Use /review to see them."*
+5. Report to user: *"Reflected on [N] tasks. Generated [N] proposals. Use *review to see them."*
 
-## /review Command
+## *review Command
 
 When triggered:
 
@@ -543,6 +543,6 @@ When triggered:
 
 **⚠️ INTENT.md proposals require explicit `APPROVE INTENT CHANGE` confirmation.**
 
-## /status Command
+## *status Command
 
 Report current environment health: spec coverage, open proposals, recent activity, health flags.

@@ -1,59 +1,47 @@
 # Agent Onboarding Plugin
 
-This plugin is installed via `claude plugin install agent-onboarding`. It provides a 7-phase onboarding workflow and a self-improving runtime for any repository.
+## Commands
 
-## Star Commands
+When the user types `*onboard`, immediately start the 7-phase onboarding workflow. Do not ask for clarification. Read `commands/onboard.md` from this plugin for the full workflow, then execute it.
 
-The following star commands are available once this plugin is installed. Type them in Claude Code to trigger the workflows.
+When the user types `*review`, immediately surface pending improvement proposals from `IMPROVEMENT_QUEUE.md`. Do not ask for clarification. Read `commands/review.md` from this plugin for the full behavior, then execute it.
 
-### *onboard
+When the user types `*reflect`, immediately trigger a friction review and generate improvement proposals. Do not ask for clarification. Read `commands/reflect.md` from this plugin for the full behavior, then execute it.
 
-Start or resume the 7-phase onboarding workflow for this repository.
+When the user types `*status`, immediately report environment health. Do not ask for clarification. Read `commands/status.md` from this plugin for the full behavior, then execute it.
 
-Read the full workflow definition from this plugin's `commands/onboard.md`. Execute it exactly as described.
+## What This Plugin Does
 
-Behavior:
-- If no `ONBOARDING_STATE.md` exists: start fresh from Phase 1 (or Pre-Phase analysis if the repo has existing content).
-- If `ONBOARDING_STATE.md` exists with `Status: In Progress`: resume from the recorded phase without re-asking answered questions.
-- If `ONBOARDING_STATE.md` exists with `Status: Complete`: report complete, offer `*status` or a targeted re-run.
+This plugin sets up a self-improving agent environment in any repository. It provides:
 
-### *review
+- A 7-phase onboarding workflow that produces `CLAUDE.md`, `INTENT.md`, `PROJECT_BRIEF.md`, `SPEC_INVENTORY.md`, and a full `SPECS/` directory.
+- A self-improving runtime (`RUNTIME.md`) that tracks friction during tasks, logs errors, and generates structured improvement proposals into `IMPROVEMENT_QUEUE.md`.
+- A review workflow where the user approves, rejects, or modifies proposals before anything changes.
 
-Surface pending improvement proposals from `IMPROVEMENT_QUEUE.md` for human review and approval.
+## Onboarding State
 
-Read the full behavior definition from this plugin's `commands/review.md`. Execute it exactly as described.
+When running `*onboard`:
+- If no `ONBOARDING_STATE.md` exists: start fresh from Phase 1, or run Pre-Phase repo analysis first if the repo has existing content.
+- If `ONBOARDING_STATE.md` exists with `Status: In Progress`: resume from the recorded phase. Do not re-ask answered questions.
+- If `ONBOARDING_STATE.md` exists with `Status: Complete`: report that onboarding is complete and suggest `*status`.
 
-Behavior:
-- Read `IMPROVEMENT_QUEUE.md` and filter for `PENDING` proposals.
-- Present each proposal with its trigger, affected artifact, confidence level, and recommended action.
-- Process APPROVE / REJECT / MODIFY decisions. Nothing changes until the user decides.
-- After review, report a summary of what was approved, rejected, and modified.
+## Runtime Behavior
 
-### *reflect
+After onboarding installs `RUNTIME.md` into the user's repo, the runtime runs automatically during every task. At the end of each task, surface a completion notice:
 
-Manually trigger a friction review and generate improvement proposals from recent work.
+If proposals were generated:
+```
+Task complete. Review queue has N pending proposal(s). Run *review to approve, reject, or modify.
+```
 
-Read the full behavior definition from this plugin's `commands/reflect.md`. Execute it exactly as described.
+If the queue is clean:
+```
+Task complete. Improvement queue is clean. No proposals pending.
+```
 
-Behavior:
-- Review recent task history for friction signals: gaps in specs, missing context, unclear intent, backtracking, repeated errors.
-- Generate proposals and write them to `IMPROVEMENT_QUEUE.md`.
-- Report how many proposals were generated and suggest `*review` to process them.
+## Important Rules
 
-### *status
-
-Report environment health: spec coverage, open proposals, and last activity.
-
-Read the full behavior definition from this plugin's `commands/status.md`. Execute it exactly as described.
-
-Behavior:
-- Check for presence and completeness of: `CLAUDE.md`, `INTENT.md`, `PROJECT_BRIEF.md`, `SPEC_INVENTORY.md`, `RUNTIME.md`, `IMPROVEMENT_QUEUE.md`, `SPECS/`.
-- Report spec coverage, count of pending proposals, and last recorded activity.
-- Flag any missing or incomplete artifacts.
-
-## Notes
-
-- These commands work in any repository where this plugin is installed.
-- The onboarding workflow reads your existing codebase before asking questions. It only asks about gaps.
-- Nothing is written to your repo without your review. All proposals go through `*review` before any changes apply.
-- The self-improving runtime (`RUNTIME.md`) is installed into your repo during onboarding. It runs automatically during tasks and generates proposals into `IMPROVEMENT_QUEUE.md`.
+- Never make changes to the user's repo without their approval.
+- All proposals go through `*review` before any changes apply.
+- During onboarding, confirm each phase output with the user before advancing.
+- For existing repos: read the codebase before asking questions. Lead with what you found, ask only about gaps.

@@ -15,7 +15,7 @@ This runtime turns a static agent environment into one that gets better every ti
 
 **Error logging** — when the agent encounters an error not covered by existing infrastructure, it logs it immediately and generates a proposal to prevent it from happening again.
 
-Proposals accumulate in `IMPROVEMENT_QUEUE.md`. A human reviews them on their own schedule using `/review`. Approved proposals get merged into the relevant artifact. The environment improves. The next agent run is cleaner.
+Proposals accumulate in `IMPROVEMENT_QUEUE.md`. A human reviews them on their own schedule using `*review`. Approved proposals get merged into the relevant artifact. The environment improves. The next agent run is cleaner.
 
 ---
 
@@ -73,7 +73,7 @@ Execute this at the start of every session, before any task work:
                                   >
                                   > 📋 **Review queue has [N] pending proposal(s).**
                                   > [N new proposal(s) were added this session. / No new proposals were added this session — [N] proposal(s) from prior sessions are still pending.]
-                                  > Run `/review` to approve, reject, or modify — nothing changes until you do.
+                                  > Run `*review` to approve, reject, or modify — nothing changes until you do.
                                   >
                                   > [If there are no pending proposals:]
                                   >
@@ -183,7 +183,7 @@ Execute this at the start of every session, before any task work:
                                   >
                                   > ## Commands
                                   >
-                                  > **`/review`** — Surface all PENDING proposals from `IMPROVEMENT_QUEUE.md`. For each proposal, present in this format:
+                                  > **`*review`** — Surface all PENDING proposals from `IMPROVEMENT_QUEUE.md`. For each proposal, present in this format:
                                   >
                                   > ```
                                   > PROPOSAL [ID] — [affected artifact]
@@ -210,13 +210,13 @@ Execute this at the start of every session, before any task work:
                                   >       To approve, type: APPROVE INTENT CHANGE
                                   >       ```
                                   >
-                                  > **`/reflect`** — Manually trigger a reflection cycle:
+                                  > **`*reflect`** — Manually trigger a reflection cycle:
                                   > - Review friction events from the current session
                                   > - - Review new error logs since last reflection
                                   >   - - Generate proposals for anything meeting the `INTENT.md` threshold
                                   >     - - Report: "Reflected on [N] sessions since last review. Generated [N] proposals."
                                   >      
-                                  >       - **`/status`** — Report current environment health (see SKILL.md for full format).
+                                  >       - **`*status`** — Report current environment health (see SKILL.md for full format).
                                   >      
                                   >       - ---
                                   >
@@ -240,12 +240,12 @@ Execute this at the start of every session, before any task work:
                                   >      
                                   >       - An unhealthy runtime looks like this:
                                   >       - - Same friction types repeating across multiple sessions without proposals being approved
-                                  >         - - Proposal queue growing without `/review` being run
+                                  >         - - Proposal queue growing without `*review` being run
                                   >           - - `INTENT.md` not updated in months despite the environment evolving significantly
                                   >             - - Error logs with no corresponding proposals
                                   >              
-                                  >               - If health indicators are poor, the `/status` command will flag them.
+                                  >               - If health indicators are poor, the `*status` command will flag them.
                                   >              
                                   >               - ---
                                   >
-                                  > `RUNTIME.md` is a system file. Modify only through the `/review` approval process. Direct edits bypass the version history and break proposal traceability.
+                                  > `RUNTIME.md` is a system file. Modify only through the `*review` approval process. Direct edits bypass the version history and break proposal traceability.

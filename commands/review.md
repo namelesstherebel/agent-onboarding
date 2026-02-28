@@ -1,4 +1,4 @@
-# /review
+# *review
 
 Surface pending improvement proposals for human review and approval.
 
@@ -6,7 +6,7 @@ Surface pending improvement proposals for human review and approval.
 
 1. Read `IMPROVEMENT_QUEUE.md`
 2. Filter for all proposals with status `PENDING`
-3. If no pending proposals: report "No pending proposals. Environment is clean." and suggest `/reflect` if the user wants to generate proposals from recent work.
+3. If no pending proposals: report "No pending proposals. Environment is clean." and suggest `*reflect` if the user wants to generate proposals from recent work.
 4. For each pending proposal, present:
 
 ```

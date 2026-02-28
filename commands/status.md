@@ -1,4 +1,4 @@
-# /status
+# *status
 
 Report the current health of the agent environment.
 
@@ -46,7 +46,7 @@ Flag these conditions when detected:
 
 - **Stale specs** — specs at version 1.0 that have had friction logged against them
 - **Unaddressed errors** — error patterns in `LOGS/errors/` with no corresponding proposal
-- **Queue buildup** — more than 5 pending proposals without a `/review` run
+- **Queue buildup** — more than 5 pending proposals without a `*review` run
 - **Intent drift** — `INTENT.md` proposals pending for more than 7 days
 - **Missing specs** — tasks in `SPEC_INVENTORY.md` that still have no spec written
 
@@ -55,7 +55,7 @@ Flag these conditions when detected:
 If `RUNTIME.md` does not exist, report:
 
 ```
-Environment not yet onboarded. Use /onboard to start the setup workflow.
+Environment not yet onboarded. Use *onboard to start the setup workflow.
 ```
 
-If `ONBOARDING_STATE.md` shows in-progress, report current phase and suggest resuming with `/onboard`.
+If `ONBOARDING_STATE.md` shows in-progress, report current phase and suggest resuming with `*onboard`.

@@ -2,13 +2,13 @@
 
 ## Commands
 
-When the user types `*onboard`, immediately start the 7-phase onboarding workflow. Do not ask for clarification. Read `commands/onboard.md` from this plugin for the full workflow, then execute it.
+When the user types `*onboard`, immediately start the 7-phase onboarding workflow. Do not ask for clarification. Read `commands*onboard.md` from this plugin for the full workflow, then execute it.
 
-When the user types `*review`, immediately surface pending improvement proposals from `IMPROVEMENT_QUEUE.md`. Do not ask for clarification. Read `commands/review.md` from this plugin for the full behavior, then execute it.
+When the user types `*review`, immediately surface pending improvement proposals from `IMPROVEMENT_QUEUE.md`. Do not ask for clarification. Read `commands*review.md` from this plugin for the full behavior, then execute it.
 
-When the user types `*reflect`, immediately trigger a friction review and generate improvement proposals. Do not ask for clarification. Read `commands/reflect.md` from this plugin for the full behavior, then execute it.
+When the user types `*reflect`, immediately trigger a friction review and generate improvement proposals. Do not ask for clarification. Read `commands*reflect.md` from this plugin for the full behavior, then execute it.
 
-When the user types `*status`, immediately report environment health. Do not ask for clarification. Read `commands/status.md` from this plugin for the full behavior, then execute it.
+When the user types `*status`, immediately report environment health. Do not ask for clarification. Read `commands*status.md` from this plugin for the full behavior, then execute it.
 
 ## What This Plugin Does
 

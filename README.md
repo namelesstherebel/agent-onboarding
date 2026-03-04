@@ -36,7 +36,9 @@ Run the agent-onboarding workflow. Read the plugin's commands*onboard.md and exe
 
 **Works on greenfield projects and existing codebases** — it reads your repo before asking any questions.
 
-**Self-improving runtime** — installed into your repo during onboarding. It tracks friction during tasks (gaps in specs, missing context, unclear intent, backtracking), logs errors, and generates improvement proposals into `IMPROVEMENT_QUEUE.md`. You review proposals with `*review`. Approved changes get merged back into the affected artifacts, incrementing their version.
+**Self-improving runtime** — installed into your repo during onboarding. It tracks friction during tasks (gaps in specs, missing context, unclear intent, backtracking), logs errors, audits context hygiene, and generates improvement proposals into `IMPROVEMENT_QUEUE.md`. You review proposals with `*review`. Approved changes get merged back into the affected artifacts, incrementing their version.
+
+**Context best practices built in** — the plugin enforces lean context engineering: CLAUDE.md stays under 200 lines with universal rules only, conditional instructions go in `.claude/rules/` with glob patterns (zero context cost when inactive), formatting rules stay in tooling, and the self-improvement loop prunes stale instructions alongside adding new ones.
 
 ---
 
@@ -90,14 +92,16 @@ After onboarding, your repo will contain:
 
 ```
 your-repo/
-├── CLAUDE.md              <- Agent context
+├── CLAUDE.md              <- Agent context (lean, <200 lines, universal rules only)
 ├── INTENT.md              <- Agent intent and trade-off rules
 ├── PROJECT_BRIEF.md       <- Project overview
 ├── SPEC_INVENTORY.md      <- Task inventory and spec queue
 ├── RUNTIME.md             <- Self-improving runtime
 ├── IMPROVEMENT_QUEUE.md   <- Proposal queue
 ├── ONBOARDING_STATE.md    <- Onboarding progress tracker
-├── CONTEXT/               <- Reference docs the agent always loads
+├── .claude/
+│   └── rules/             <- Scoped context (glob-activated, zero cost when inactive)
+├── CONTEXT/               <- Reference docs (pointed to, not inlined)
 └── SPECS/                 <- Agent-executable specifications
 ```
 
@@ -130,10 +134,10 @@ Run `*review` after your first task. For each proposal the agent shows what trig
 | Phase | Name | Produces |
 |-------|------|----------|
 | 1 | Project Discovery | `PROJECT_BRIEF.md` |
-| 2 | Context Engineering | `CLAUDE.md`, `CONTEXT/` |
+| 2 | Context Engineering | `CLAUDE.md`, `.claude/rules/`, `CONTEXT/` |
 | 3 | Intent Engineering | `INTENT.md` |
 | 4 | Specification Readiness | `SPEC_INVENTORY.md` |
-| 5 | Environment Build | File structure, dependencies, runtime |
+| 5 | Environment Build | File structure, scoped rules, dependencies, runtime |
 | 6 | Specification Writing | `SPECS/*.md` |
 | 7 | Verify and Launch | Validation, handoff to runtime |
 

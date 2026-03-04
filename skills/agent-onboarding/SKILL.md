@@ -148,51 +148,74 @@ Confirm with user before advancing.
 
 For existing repos: much of this may already be inferable. Read the codebase before asking. Note conventions you observe — naming patterns, file structure, comment style. Ask only what you can't infer.
 
+### Context Best Practices
+
+Apply these principles when generating CLAUDE.md and all context files:
+
+- **Keep it lean.** CLAUDE.md under 200 lines. Only instructions that apply to every session. When in doubt, cut it.
+- **Universal vs. conditional.** If an instruction only matters sometimes, it doesn't belong in CLAUDE.md. Use `.claude/rules/` with glob patterns for scoped context.
+- **Never use context files as a linter.** Formatting and style rules belong in tooling (prettier, eslint, black, etc.). An LLM following style rules is slower, more expensive, and less reliable than a formatter.
+- **Corrections over instructions.** The highest-value entries are things Claude gets wrong in this specific codebase. Generic instructions Claude would follow anyway are noise.
+- **Pointers over content.** Tell Claude where to find information rather than embedding it. A file path or search directive is cheaper than reproducing content inline.
+- **One directive per line.** If it takes a paragraph, it's not specific enough.
+- **Progressive disclosure.** Don't front-load everything Claude could possibly need. Surface information on demand.
+- **Every line pays rent.** If it's not actively correcting behavior or providing critical path information Claude can't infer, it's a cost with no return.
+
 **Questions (use what's needed):**
 
 1. What files or docs should the agent always have access to?
-2. What conventions must the agent follow? (naming, formatting, code style, communication)
+2. What conventions must the agent follow that aren't enforced by existing tooling? (Only conventions that linters/formatters don't already handle)
 3. What tools, APIs, or external systems will the agent interact with?
 4. What's the full tech stack?
 5. What are recurring input types the agent receives?
 6. Is there domain-specific vocabulary the agent needs?
 7. What does agent memory look like — session-only, persistent, file-based, or RAG? If RAG: what's the data source, embedding model, vector store, and retrieval strategy?
-8. Are there special dependencies vital to the workflow that aren't captured in standard package files? (e.g., a custom vector DB, a proprietary embedding service, a self-hosted model, or external memory infrastructure)
+8. Are there special dependencies vital to the workflow that aren't captured in standard package files?
 9. What should the agent re-check at the start of each session?
-10. (Existing repos) Are there undocumented conventions the agent should know about?
+10. (Existing repos) What does Claude get wrong or miss in this codebase? What corrections would save the most time?
 
 **Produce `CLAUDE.md`:**
 
+Keep this lean. One directive per line where possible. Point to files rather than embedding content. Only include what applies to every session.
+
 ```markdown
-# Agent Context — [Project Name]
-*Last updated: [date]*
+# [Project Name]
 
 ## Stack
-[Languages, frameworks, databases, hosting — be specific]
+[Languages, frameworks, databases, hosting — one line each]
 
-## Conventions
-[Naming, formatting, code style, communication patterns]
-[For existing repos: note observed patterns + confirmed by owner]
+## Corrections
+[Things Claude gets wrong in this specific codebase — highest value section]
+[e.g., "Use pgx not database/sql — the project migrated in Q3"]
+[e.g., "The /api/v2 routes use middleware auth, not per-handler — see middleware/auth.go"]
+
+## Conventions Not Enforced by Tooling
+[Only conventions that linters/formatters don't handle]
+[Skip anything already covered by .eslintrc, .prettierrc, pyproject.toml, etc.]
+
+## Key Paths
+[Pointers to important files/directories the agent needs frequently]
+[e.g., "API routes: src/routes/ | DB migrations: db/migrations/ | Tests: __tests__/"]
 
 ## Tools & Integrations
-[APIs, MCPs, external systems — with connection notes and auth patterns]
-
-## Domain Knowledge
-[Key terms, concepts, domain-specific knowledge]
-
-## Check Each Session
-[Things that may have changed — open issues, recent deploys, updated docs]
+[APIs, MCPs, external systems — connection notes and auth patterns]
 
 ## Never Do Without Asking
-[Actions requiring explicit human approval before executing]
+[Actions requiring explicit human approval — one per line]
 
 ## Known Complexity
-[Parts of the codebase or environment that are tricky or require extra care]
+[Parts of the codebase that are tricky — with file paths, not explanations]
 ```
 
 Also produce:
+- `.claude/rules/` directory — scoped context files with glob patterns for file-type or workflow-specific instructions that don't apply every session
 - `CONTEXT/` directory — reference files the agent should always load
-- `ENVIRONMENT.md` — if hosting, auth, or integrations have notable complexity
+- `ENVIRONMENT.md` — only if hosting, auth, or integrations have notable complexity
+
+When deciding what goes where:
+- CLAUDE.md → universal, every-session rules (under 200 lines)
+- `.claude/rules/*.md` → conditional rules activated by glob patterns (zero cost when not relevant)
+- `CONTEXT/` → reference material too large for inline inclusion
 
 **Advance:** `"ready"` → Phase 3
 
@@ -325,14 +348,17 @@ Work through in order. Confirm each section before moving to the next.
 
 ```
 /[repo-root]/
-├── CLAUDE.md                  ← Agent context
+├── CLAUDE.md                  ← Agent context (lean, under 200 lines)
 ├── INTENT.md                  ← Agent intent (⚠️ protected)
 ├── PROJECT_BRIEF.md           ← Project brief
 ├── SPEC_INVENTORY.md          ← Spec queue
 ├── RUNTIME.md                 ← Self-improving runtime (installed here)
 ├── IMPROVEMENT_QUEUE.md       ← Proposal queue (starts empty)
 ├── ONBOARDING_STATE.md        ← Onboarding progress tracker
-├── CONTEXT/                   ← Reference docs
+├── .claude/
+│   └── rules/                 ← Scoped context (glob-activated, zero cost when inactive)
+│       └── [pattern-name].md
+├── CONTEXT/                   ← Reference docs (pointed to, not inlined)
 ├── SPECS/                     ← Agent-executable specifications
 │   └── [task-name].md
 ├── LOGS/                      ← Agent session logs + error logs
@@ -359,10 +385,13 @@ For each external system in `CLAUDE.md`:
 
 ### 5D — Rules Files
 
-Based on `INTENT.md`, create:
+Based on `INTENT.md` and the context best practices, create:
+- `.claude/rules/` scoped context files — conditional instructions with glob patterns that only activate when relevant (e.g., `*.test.ts` rules, `migrations/*.sql` rules, `docs/*.md` rules). Move any Phase 2 instructions that aren't universal here.
 - `AGENTS.md` — for Claude Code environments
 - `.cursorrules` / `.windsurfrules` — for AI IDE environments
 - Custom rule files per project conventions
+
+When creating scoped rules, each file should specify its glob pattern and contain only the instructions relevant to that file pattern. This keeps CLAUDE.md lean and avoids loading irrelevant context.
 
 ### 5E — Install Runtime
 
@@ -446,7 +475,10 @@ What causes this task to start?
 ## Phase 7 — Verify and Launch
 
 - [ ] `PROJECT_BRIEF.md` is accurate and complete
-- [ ] `CLAUDE.md` loads correctly — agent can reference conventions
+- [ ] `CLAUDE.md` is under 200 lines, contains only universal rules
+- [ ] `CLAUDE.md` has no formatting/style rules that belong in tooling
+- [ ] `CLAUDE.md` uses pointers (file paths) not embedded content
+- [ ] Conditional instructions are in `.claude/rules/` with glob patterns, not in CLAUDE.md
 - [ ] `INTENT.md` covers known edge cases and trade-offs
 - [ ] Friction threshold is clearly defined in `INTENT.md`
 - [ ] `SPEC_INVENTORY.md` is complete and prioritized

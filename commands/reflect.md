@@ -14,20 +14,28 @@ Manually trigger a friction review and generate improvement proposals.
 
 2. **Review error logs** — scan `LOGS/errors/` for new entries since the last reflection.
 
-3. **Evaluate against threshold** — compare accumulated friction against the friction threshold defined in `INTENT.md`.
+3. **Audit context hygiene** — check context files against best practices:
+   - Is `CLAUDE.md` over 200 lines? → propose pruning or scoping
+   - Are there conditional instructions in `CLAUDE.md` that should be in `.claude/rules/`?
+   - Are there style/formatting rules that belong in tooling, not context files?
+   - Are there instructions Claude follows correctly without being told? → propose removal
+   - Is content embedded that should be a file path pointer instead?
+   - Are there stale instructions that no longer apply?
 
-4. **Generate proposals** — for anything that meets the threshold, create structured improvement proposals and append them to `IMPROVEMENT_QUEUE.md`. Follow the proposal format defined in `RUNTIME.md`. One proposal per root cause — consolidate related friction events.
+4. **Evaluate against threshold** — compare accumulated friction against the friction threshold defined in `INTENT.md`.
 
-5. **Report to user:**
+5. **Generate proposals** — for anything that meets the threshold (including context hygiene issues), create structured improvement proposals and append them to `IMPROVEMENT_QUEUE.md`. Follow the proposal format defined in `RUNTIME.md`. One proposal per root cause — consolidate related friction events.
+
+6. **Report to user:**
 
 ```
-Reflected on [N] tasks since last review. Generated [N] proposals. Use *review to see them.
+Reflected on [N] tasks since last review. Generated [N] proposals ([N] friction, [N] context hygiene). Use *review to see them.
 ```
 
 If no friction met the threshold:
 
 ```
-Reflected on [N] tasks since last review. No proposals generated — friction below threshold.
+Reflected on [N] tasks since last review. No proposals generated — friction below threshold, context is clean.
 ```
 
 ## When to Use

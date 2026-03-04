@@ -20,10 +20,17 @@ Read the environment artifacts and generate a health report:
 - Approved this month: [N]
 - Rejected this month: [N]
 
+## Context Hygiene
+- CLAUDE.md line count: [N] / 200 max
+- Scoped rule files (.claude/rules/): [N]
+- Style rules in context files (should be 0): [N]
+- Instructions Claude follows without being told (candidates for removal): [N]
+
 ## Recent Activity
 - Last agent task: [date + task name]
 - Last proposal generated: [date]
 - Last spec updated: [spec name + date]
+- Last context audit: [date]
 
 ## Health Flags
 - [Any specs that haven't been updated despite repeated friction]
@@ -49,6 +56,10 @@ Flag these conditions when detected:
 - **Queue buildup** — more than 5 pending proposals without a `*review` run
 - **Intent drift** — `INTENT.md` proposals pending for more than 7 days
 - **Missing specs** — tasks in `SPEC_INVENTORY.md` that still have no spec written
+- **Context bloat** — `CLAUDE.md` exceeds 200 lines
+- **Misplaced rules** — conditional/file-specific instructions in `CLAUDE.md` instead of `.claude/rules/`
+- **Tooling duplication** — style or formatting rules in context files instead of linter/formatter configs
+- **Stale instructions** — directives Claude follows correctly without being told (wasted context budget)
 
 ## If Environment Is Not Onboarded
 

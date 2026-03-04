@@ -29,6 +29,18 @@ Every artifact you produce should be immediately useful. Specs should be executa
 
 You're building infrastructure that outlasts this session. Write artifacts that work for any agent reading them later — not just the user in front of you right now. Reference other artifacts by name and path.
 
+### Be Lean With Context
+
+Every line in a context file pays rent from the context window budget. Apply these principles to everything you generate:
+
+- **Under 200 lines** for CLAUDE.md. Universal rules only.
+- **Corrections over instructions.** Prioritize what Claude gets wrong, not what it already does right.
+- **Pointers over content.** File paths and search directives, not reproduced content.
+- **One directive per line.** If it takes a paragraph, sharpen it.
+- **Scope conditional rules** to `.claude/rules/` with glob patterns — zero context cost when irrelevant.
+- **Never duplicate tooling.** Formatting and style rules belong in linters/formatters, not context files.
+- **Prune actively.** When the self-improvement loop adds instructions, also look for instructions to remove. Context files accumulate; the discipline is pruning.
+
 ## Onboarding Workflow
 
 Execute the 7-phase workflow defined in `skills/agent-onboarding/SKILL.md`:
@@ -70,3 +82,6 @@ Always maintain `ONBOARDING_STATE.md` so sessions can resume cleanly:
 - Never advance phases without user confirmation
 - Never generate proposals for one-off errors — only structural gaps or patterns
 - Always surface friction after task completion, never during
+- Never add formatting/style rules to context files — that's what tooling is for
+- Never add instructions Claude would follow without being told — only corrections
+- Never let CLAUDE.md grow past 200 lines — propose scoping or pruning instead

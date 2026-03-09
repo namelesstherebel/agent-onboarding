@@ -40,6 +40,8 @@ Run the agent-onboarding workflow. Read the plugin's commands*onboard.md and exe
 
 **Context best practices built in** — the plugin enforces lean context engineering: CLAUDE.md stays under 200 lines with universal rules only, conditional instructions go in `.claude/rules/` with glob patterns (zero context cost when inactive), formatting rules stay in tooling, and the self-improvement loop prunes stale instructions alongside adding new ones.
 
+**Git worktree support** — optional Phase 5F walks you through setting up behavior profiles for worktrees. Each profile gets its own `CLAUDE.md` and `INTENT.md` as pure behavioral contracts (project-agnostic, reusable across repos). A `WORKTREES.md` at root documents the profiles, branch naming patterns, usage commands, and the full inheritance chain.
+
 ---
 
 ## Commands
@@ -99,17 +101,23 @@ your-repo/
 ├── RUNTIME.md             <- Self-improving runtime
 ├── IMPROVEMENT_QUEUE.md   <- Proposal queue
 ├── ONBOARDING_STATE.md    <- Onboarding progress tracker
+├── WORKTREES.md           <- Worktree profiles and usage (if worktrees enabled)
 ├── .claude/
 │   └── rules/             <- Scoped context (glob-activated, zero cost when inactive)
 ├── CONTEXT/               <- Reference docs (pointed to, not inlined)
-└── SPECS/                 <- Agent-executable specifications
+├── SPECS/                 <- Agent-executable specifications
+├── profiles/              <- Behavior profiles (if worktrees enabled)
+│   └── [name]/
+│       ├── CLAUDE.md      <- Behavior-mode context
+│       └── INTENT.md      <- Behavior-mode trade-offs
+└── worktrees/             <- Worktree entry points (if worktrees enabled)
+    └── [name]/
+        └── CLAUDE.md      <- Thin file, references root + profile
 ```
 
 ### Verify the runtime is working
 
-After onboarding, run any task in the repo. At the end of every task the agent surfaces a completion notice.
-
-If proposals were generated:
+After onboarding, run any task in the repo. At the end of every task the agent surfaces a completion notice. If proposals were generated:
 
 ```
 Task complete. Review queue has N pending proposal(s). Run *review to approve, reject, or modify.
@@ -137,11 +145,27 @@ Run `*review` after your first task. For each proposal the agent shows what trig
 | 2 | Context Engineering | `CLAUDE.md`, `.claude/rules/`, `CONTEXT/` |
 | 3 | Intent Engineering | `INTENT.md` |
 | 4 | Specification Readiness | `SPEC_INVENTORY.md` |
-| 5 | Environment Build | File structure, scoped rules, dependencies, runtime |
+| 5 | Environment Build | File structure, scoped rules, dependencies, runtime, *(optional)* worktree profiles |
 | 6 | Specification Writing | `SPECS/*.md` |
 | 7 | Verify and Launch | Validation, handoff to runtime |
 
 For existing repos, the workflow reads your codebase first and leads with what it found — it only asks about gaps.
+
+---
+
+## Git Worktree Support
+
+At the end of Phase 5 (after the smoke test), the onboarding flow asks: *"Do you plan on using git worktrees with this repo?"*
+
+If yes, Phase 5F runs and produces:
+
+- **`/profiles/[name]/`** — one directory per behavior profile, each containing a `CLAUDE.md` (allowed actions, restrictions, focus) and `INTENT.md` (goal, priority order, uncertainty protocol)
+- **`/worktrees/[name]/`** — thin `CLAUDE.md` files that reference the root context and the matching profile
+- **`WORKTREES.md`** — documents profiles, branch naming patterns, usage commands, and the inheritance chain
+
+Default profiles suggested: `scaffold`, `refactor`, `debug`, `review`. Custom profiles are accepted.
+
+**Key constraint:** profile files are project-agnostic — no stack names, filenames, or domain terms. Those live in root `CLAUDE.md`. Profiles are behavioral contracts only, which makes them reusable across repos.
 
 ---
 

@@ -1,18 +1,6 @@
----
-name: agent-onboarding
+--- name: agent-onboarding
 description: >
-  Use this skill whenever a user wants to set up a new repo, project, or
-  environment for autonomous agent operation. Triggers include: "set up a new
-  project", "onboard this repo", "make this agent-ready", "start a new workflow
-  environment", "drop this into a repo", "implement this on my existing
-  project", or any request to systematically build out context, intent, specs,
-  or agent infrastructure from scratch or on top of existing work. This skill
-  guides the user through 7 progressive phases — Project Discovery → Context
-  Engineering → Intent Engineering → Specification Readiness → Environment
-  Build → Specification Writing → Verify & Launch — and installs a
-  self-improving runtime loop that continuously evolves the environment through
-  friction-triggered improvement proposals. Works on greenfield projects AND
-  existing repos. Do NOT use for one-off tasks or single prompts.
+  Use this skill whenever a user wants to set up a new repo, project, or environment for autonomous agent operation. Triggers include: "set up a new project", "onboard this repo", "make this agent-ready", "start a new workflow environment", "drop this into a repo", "implement this on my existing project", or any request to systematically build out context, intent, specs, or agent infrastructure from scratch or on top of existing work. This skill guides the user through 7 progressive phases — Project Discovery → Context Engineering → Intent Engineering → Specification Readiness → Environment Build → Specification Writing → Verify & Launch — and installs a self-improving runtime loop that continuously evolves the environment through friction-triggered improvement proposals. Works on greenfield projects AND existing repos. Do NOT use for one-off tasks or single prompts.
 ---
 
 # Unified Agent Onboarding + Self-Improving Runtime Skill
@@ -77,7 +65,9 @@ If the user is onboarding an existing repo, read the environment before intervie
 9. Check for: existing tests, CI config — infer quality standards
 10. Summarize what you learned before asking anything
 
-Present a brief **"Here's what I found"** summary to the user. Fill in what you already know. Only ask about gaps. This respects their time and demonstrates you're working *with* them, not interrogating them.
+Present a brief **"Here's what I found"** summary to the user. Fill in what you already know. Only ask about gaps.
+
+This respects their time and demonstrates you're working *with* them, not interrogating them.
 
 If it's a **greenfield repo** (empty or near-empty): skip the analysis, go straight to Phase 1 questions.
 
@@ -223,9 +213,9 @@ When deciding what goes where:
 
 ## Phase 3 — Intent Engineering
 
-**Goal:** Document what the agent optimizes for. This is the most important document in the system.
+**Goal:** Document what the agent optimizes for.
 
-Intent governs everything. A well-written `INTENT.md` means agents make good judgment calls autonomously. A weak one means they optimize for the wrong thing at scale. Take time here.
+This is the most important document in the system. Intent governs everything. A well-written `INTENT.md` means agents make good judgment calls autonomously. A weak one means they optimize for the wrong thing at scale. Take time here.
 
 For existing repos: look for implicit intent in existing docs, commit messages, README goals sections. Surface it explicitly and confirm.
 
@@ -247,6 +237,7 @@ For existing repos: look for implicit intent in existing docs, commit messages, 
 
 ```markdown
 # Agent Intent — [Project Name]
+
 *Last updated: [date]*
 *⚠️ Changes to this file require explicit human review and approval via *review*
 
@@ -314,9 +305,11 @@ For existing repos: look for existing runbooks, READMEs with process steps, Make
 
 ```markdown
 # Specification Inventory — [Project Name]
+
 *Last updated: [date]*
 
 ## Recurring Tasks
+
 | Task | Spec Exists? | Quality Bar Defined? | Multi-Session? | Priority |
 |------|-------------|---------------------|----------------|----------|
 | [Task 1] | No | No | No | High |
@@ -348,20 +341,28 @@ Work through in order. Confirm each section before moving to the next.
 
 ```
 /[repo-root]/
-├── CLAUDE.md                  ← Agent context (lean, under 200 lines)
-├── INTENT.md                  ← Agent intent (⚠️ protected)
-├── PROJECT_BRIEF.md           ← Project brief
-├── SPEC_INVENTORY.md          ← Spec queue
-├── RUNTIME.md                 ← Self-improving runtime (installed here)
-├── IMPROVEMENT_QUEUE.md       ← Proposal queue (starts empty)
-├── ONBOARDING_STATE.md        ← Onboarding progress tracker
+├── CLAUDE.md                 ← Agent context (lean, under 200 lines)
+├── INTENT.md                 ← Agent intent (⚠️ protected)
+├── PROJECT_BRIEF.md          ← Project brief
+├── SPEC_INVENTORY.md         ← Spec queue
+├── RUNTIME.md                ← Self-improving runtime (installed here)
+├── IMPROVEMENT_QUEUE.md      ← Proposal queue (starts empty)
+├── ONBOARDING_STATE.md       ← Onboarding progress tracker
+├── WORKTREES.md              ← Worktree profiles and usage (if worktrees enabled)
 ├── .claude/
-│   └── rules/                 ← Scoped context (glob-activated, zero cost when inactive)
+│   └── rules/                ← Scoped context (glob-activated, zero cost when inactive)
 │       └── [pattern-name].md
-├── CONTEXT/                   ← Reference docs (pointed to, not inlined)
-├── SPECS/                     ← Agent-executable specifications
+├── CONTEXT/                  ← Reference docs (pointed to, not inlined)
+├── SPECS/                    ← Agent-executable specifications
 │   └── [task-name].md
-├── LOGS/                      ← Agent session logs + error logs
+├── profiles/                 ← Behavior profiles (if worktrees enabled)
+│   └── [name]/
+│       ├── CLAUDE.md         ← Behavior-mode context
+│       └── INTENT.md         ← Behavior-mode trade-offs
+├── worktrees/                ← Worktree entry points (if worktrees enabled)
+│   └── [name]/
+│       └── CLAUDE.md         ← Thin file, references root + profile
+├── LOGS/                     ← Agent session logs + error logs
 │   ├── sessions/
 │   └── errors/
 └── [project-specific dirs]
@@ -401,22 +402,156 @@ Copy `RUNTIME.md` into the repo root. This is the self-improving operating syste
 
 Run one minimal agent task end-to-end. Verify the environment works before writing specs.
 
+### 5F — Worktree Setup *(optional)*
+
+After the smoke test, ask:
+
+> "Do you plan on using git worktrees with this repo?"
+
+**No** → skip to Phase 6.
+
+**Yes** → continue with the steps below.
+
+**Step 1 — Identify behavior profiles**
+
+Ask which behavior profiles they want. Suggest these as defaults:
+- `scaffold` — building new features, files, and structure from scratch
+- `refactor` — restructuring existing code without changing behavior
+- `debug` — diagnosing and resolving failures
+- `review` — auditing code for correctness, clarity, and spec alignment
+
+Accept custom profile names. After presenting suggestions, ask: *"Any additional profiles?"* — repeat until the user says no.
+
+**Step 2 — Build profile files**
+
+For each confirmed profile, generate:
+
+```
+/profiles/[name]/
+├── CLAUDE.md     ← Behavior-mode context: allowed actions, restrictions, focus areas
+└── INTENT.md     ← Behavior-mode trade-offs: goal, priority order, uncertainty protocol
+```
+
+**Profile file constraints — enforce strictly:**
+- Profile files must be **project-agnostic** — no stack names, filenames, domain terms, or technology references
+- Those specifics live in the root `CLAUDE.md`
+- Profiles are **behavioral contracts only** — they define how the agent operates, not what it operates on
+- This makes profiles reusable across repos
+
+`CLAUDE.md` template for a profile:
+```markdown
+# [Profile Name] Mode
+
+## Allowed Actions
+[What this mode permits — behavioral, not technical]
+
+## Restrictions
+[What this mode prohibits or requires extra caution around]
+
+## Focus
+[What the agent prioritizes its attention on in this mode]
+
+## Entry Checklist
+[What to verify before starting work in this mode]
+```
+
+`INTENT.md` template for a profile:
+```markdown
+# [Profile Name] Intent
+
+## Goal
+[What this mode is optimizing for — one sentence]
+
+## Priority Order
+1. [Highest priority]
+2. [Second priority]
+3. [Third priority]
+
+## Uncertainty Protocol
+[How to handle uncertainty specific to this mode]
+
+## Exit Criteria
+[When this mode's work is considered done]
+```
+
+**Step 3 — Build worktree entry points**
+
+For each profile, generate a thin `CLAUDE.md` in the corresponding worktree directory:
+
+```
+/worktrees/[name]/
+└── CLAUDE.md
+```
+
+Worktree `CLAUDE.md` template:
+```markdown
+# [Name] Worktree
+
+## Context Inheritance
+This worktree inherits from:
+- Root `CLAUDE.md` — project context and universal rules
+- Root `INTENT.md` — project-level goals and trade-offs
+- `profiles/[name]/CLAUDE.md` — behavior-mode context
+- `profiles/[name]/INTENT.md` — behavior-mode trade-offs
+
+## Branch Naming
+[branch-prefix]/[descriptor] — e.g., `[name]/add-login-flow`
+
+## Notes
+[Any worktree-specific operational notes]
+```
+
+**Step 4 — Generate `WORKTREES.md` at repo root**
+
+```markdown
+# Worktrees
+
+*Last updated: [date]*
+
+## Active Profiles
+
+| Profile | Purpose | Branch Pattern |
+|---------|---------|---------------|
+| [name] | [one-line purpose] | `[name]/[descriptor]` |
+
+## Inheritance Chain
+
+Each worktree loads context in this order:
+1. Root `CLAUDE.md` — universal project context
+2. Root `INTENT.md` — project goals and trade-offs
+3. `profiles/[name]/CLAUDE.md` — behavior-mode context
+4. `profiles/[name]/INTENT.md` — behavior-mode trade-offs
+
+## Usage
+
+```bash
+# Create a new worktree
+git worktree add ../[repo]-[name] -b [name]/[descriptor]
+
+# List active worktrees
+git worktree list
+
+# Remove a worktree
+git worktree remove ../[repo]-[name]
+```
+
+## Profile Notes
+[Any cross-profile guidance or constraints]
+```
+
 **Advance:** `"ready"` → Phase 6
 
 ---
 
 ## Phase 6 — Specification Writing
 
-Write agent-executable specs for every item in the Phase 6 queue.
-
-One spec at a time, in priority order. Confirm each before moving to the next.
-
-Save each as `SPECS/[task-name].md`.
+Write agent-executable specs for every item in the Phase 6 queue. One spec at a time, in priority order. Confirm each before moving to the next. Save each as `SPECS/[task-name].md`.
 
 **Spec template:**
 
 ```markdown
 # [Task Name] Specification
+
 *Version: 1.0 | Last updated: [date]*
 
 ## Purpose
@@ -489,10 +624,16 @@ What causes this task to start?
 - [ ] `LOGS/sessions/` and `LOGS/errors/` directories exist
 - [ ] At least one spec tested end-to-end with a real agent run
 - [ ] Agent completed a full task without asking clarifying questions
+- [ ] *(If worktrees)* All profiles have `CLAUDE.md` and `INTENT.md` in `profiles/[name]/`
+- [ ] *(If worktrees)* `WORKTREES.md` exists at repo root and accurately reflects all profiles
+- [ ] *(If worktrees)* Each profile smoke-tested with a real agent run in its worktree
+- [ ] *(If worktrees)* `SPEC_INVENTORY.md` notes which specs belong to which profile
 
 Any unchecked box: return to the relevant phase and fix.
 
-When all boxes are checked: **onboarding is complete.** `RUNTIME.md` takes over. Update `ONBOARDING_STATE.md` to `Status: Complete`.
+When all boxes are checked: **onboarding is complete.** `RUNTIME.md` takes over.
+
+Update `ONBOARDING_STATE.md` to `Status: Complete`.
 
 ---
 
@@ -522,7 +663,6 @@ On session start: read this file before asking anything. Resume from recorded st
 ## Session Start Protocol
 
 Every session in an onboarded repo:
-
 1. Read `RUNTIME.md` — confirms runtime is active
 2. Read `CLAUDE.md` — loads context
 3. Read `INTENT.md` — loads goals and trade-off hierarchy
@@ -533,7 +673,6 @@ Every session in an onboarded repo:
 ## Friction Detection
 
 During task execution, track friction in real time. Friction is defined as:
-
 - Making an assumption because the spec or context didn't cover a case
 - Asking a clarifying question that a better spec would have answered
 - Backtracking or redoing work because initial understanding was wrong
@@ -546,7 +685,6 @@ Each friction event gets logged internally. At task completion, evaluate against
 ## Error Logging
 
 When an unexpected error occurs:
-
 1. Log immediately to `LOGS/errors/[date]-[task]-[N].md`
 2. Evaluate whether to stop and escalate or log and continue based on `INTENT.md` uncertainty protocol
 3. If the error indicates a structural gap: generate an improvement proposal
@@ -554,7 +692,6 @@ When an unexpected error occurs:
 ## *reflect Command
 
 When triggered manually or at natural task completion checkpoints:
-
 1. Review friction events from current session
 2. Review any new error logs
 3. Evaluate against friction threshold in `INTENT.md`
@@ -564,7 +701,6 @@ When triggered manually or at natural task completion checkpoints:
 ## *review Command
 
 When triggered:
-
 1. Open `IMPROVEMENT_QUEUE.md`
 2. Surface all proposals with status `PENDING`
 3. For each proposal, present with a recommended action

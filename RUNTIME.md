@@ -197,9 +197,47 @@ Every change is traceable to a root cause.
 
 For INTENT.md proposals, require explicit `APPROVE INTENT CHANGE` confirmation.
 
-**`*reflect`** — Manually trigger reflection: review friction, review errors, evaluate threshold, generate proposals. Also audit context hygiene — check CLAUDE.md line count, look for conditional instructions that should be scoped, identify stale directives.
+**`*reflect`** — Manually trigger reflection: review friction, review errors, evaluate threshold, generate proposals. Also audit context hygiene — check CLAUDE.md line count, look for conditional instructions that should be scoped, identify stale directives. Also run **context reconciliation** (see below).
 
-**`*status`** — Report environment health: spec coverage, open proposals, recent activity, health flags, context hygiene metrics.
+**`*status`** — Report environment health: spec coverage, open proposals, recent activity, health flags, context hygiene metrics, last reconciliation date.
+
+---
+
+## Context Reconciliation
+
+Context artifacts drift as the codebase evolves. Never summarize summaries — each layer regenerates from the source below it, and the codebase is always the lossless source of truth.
+
+**When to reconcile:**
+- During `*reflect` (every manual reflection includes a reconciliation pass)
+- When friction events suggest the agent is working from stale context
+- At natural project milestones (major feature complete, dependency upgrade, architecture change)
+
+**Reconciliation steps:**
+1. Compare `CLAUDE.md` Key Paths against actual file structure — flag paths that no longer exist or have moved
+2. Compare `CLAUDE.md` Corrections against current code — flag corrections for patterns that have been fully migrated
+3. Compare `CONTEXT/` files against the modules they describe — flag descriptions that no longer match
+4. Check `.claude/rules/` glob patterns against current file structure — flag rules targeting files that don't exist
+5. Generate proposals for any drift found — same format, same `*review` process
+
+**Rule: never patch a summary from another summary.** If a CONTEXT/ file is stale, regenerate it by reading the actual code, not by editing the old description.
+
+---
+
+## Decision Log
+
+`CONTEXT/decisions.md` is an append-only log preserving *why* architectural and convention decisions were made. The "why" is the context most vulnerable to loss when artifacts are updated or compressed.
+
+**When to append:**
+- When `*review` approves a proposal that changes conventions, architecture, or intent
+- When a task reveals an undocumented decision that was clearly intentional
+- When the user explains why something is the way it is
+
+**Format:** `[YYYY-MM-DD] [Decision] — [Why]`
+
+**Rules:**
+- Never edit or delete entries — append only
+- Never summarize the decision log — it stays verbatim
+- Reconciliation may add entries (documenting discovered decisions) but never removes them
 
 ---
 

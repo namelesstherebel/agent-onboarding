@@ -54,18 +54,46 @@ If both conditions exist (runtime installed but onboarding state file shows inco
 
 If the user is onboarding an existing repo, read the environment before interviewing them. You already have information — use it.
 
-1. List all files in the repo root
+This analysis runs in three stages. Each stage builds on the previous. Don't skip ahead.
+
+### Stage 1 — Structural Analysis (deterministic)
+
+Gather facts. No LLM interpretation yet.
+
+1. List all files in the repo root and top-level directories
 2. Read: `README.md`, `package.json` / `composer.json` / `requirements.txt` (whichever exists)
 3. Read: any existing `docs/` or documentation files
 4. Read: any existing `.md` files at root level
 5. Check for: existing `CLAUDE.md`, `INTENT.md`, `specs/`, `CONTEXT/` — note what's already done
 6. Check for: `.env.example`, `docker-compose.yml`, `Makefile` — infer the stack
-7. Check for: memory or RAG infrastructure — directories like `vector-store/`, `embeddings/`, `memory/`; config files for Pinecone, Chroma, Weaviate, FAISS, LlamaIndex, LangChain, or similar — note what's present
+7. Check for: memory or RAG infrastructure — directories like `vector-store/`, `embeddings/`, `memory/`; config files for Pinecone, Chroma, Weaviate, FAISS, LlamaIndex, LangChain, or similar
 8. Check for: special dependency manifests beyond standard package files — `Modelfile`, `*.llamafile`, custom model configs, ML framework configs, or unusual lock files
 9. Check for: existing tests, CI config — infer quality standards
-10. Summarize what you learned before asking anything
+10. Map entry points — where does execution start? What are the public interfaces?
+11. Note LOC distribution by directory — where does the complexity live?
 
-Present a brief **"Here's what I found"** summary to the user. Fill in what you already know. Only ask about gaps.
+### Stage 2 — Convention Extraction (LLM-assisted)
+
+Sample 3-5 representative files from the most active directories. Extract:
+
+- **Naming patterns** — files, functions, variables, classes, database columns
+- **Error handling style** — exceptions vs error returns, logging patterns, error messages
+- **Testing conventions** — test location, naming, setup/teardown patterns, assertion style
+- **Import/dependency patterns** — how modules reference each other, barrel files, path aliases
+- **Comment and documentation style** — when comments appear, what they cover
+
+Don't infer conventions from a single file. Cross-reference across files — only record patterns that appear consistently.
+
+### Stage 3 — Pattern Mining (implicit knowledge)
+
+Look for things that aren't documented but are clearly intentional:
+
+- Code that looks "wrong" but exists in multiple places — likely a deliberate workaround
+- Inconsistencies between documentation and actual code — the code is the truth
+- Performance patterns, caching strategies, or retry logic that isn't documented
+- Dead code or TODOs that signal incomplete migrations or abandoned approaches
+
+Present a brief **"Here's what I found"** summary organized by stage. Fill in what you already know. Only ask about gaps.
 
 This respects their time and demonstrates you're working *with* them, not interrogating them.
 
@@ -143,10 +171,12 @@ For existing repos: much of this may already be inferable. Read the codebase bef
 Apply these principles when generating CLAUDE.md and all context files:
 
 - **Keep it lean.** CLAUDE.md under 200 lines. Only instructions that apply to every session. When in doubt, cut it.
+- **Budget the context window.** Rough targets: system prompt + CLAUDE.md ~20%, task spec ~20%, active code ~40%, interfaces + CONTEXT/ ~10%, reserve ~10%. When any category exceeds its budget, summarize (never truncate). These are starting points — adjust based on the model and task complexity.
 - **Universal vs. conditional.** If an instruction only matters sometimes, it doesn't belong in CLAUDE.md. Use `.claude/rules/` with glob patterns for scoped context.
 - **Never use context files as a linter.** Formatting and style rules belong in tooling (prettier, eslint, black, etc.). An LLM following style rules is slower, more expensive, and less reliable than a formatter.
 - **Corrections over instructions.** The highest-value entries are things Claude gets wrong in this specific codebase. Generic instructions Claude would follow anyway are noise.
 - **Pointers over content.** Tell Claude where to find information rather than embedding it. A file path or search directive is cheaper than reproducing content inline.
+- **Understanding over code.** Context files should hold the agent's understanding *about* the code — architecture relationships, conventions, decision rationale — not reproduced source code. The filesystem is already infinite memory. CONTEXT/ files that are just copied code are wasting the window.
 - **One directive per line.** If it takes a paragraph, it's not specific enough.
 - **Progressive disclosure.** Don't front-load everything Claude could possibly need. Surface information on demand.
 - **Every line pays rent.** If it's not actively correcting behavior or providing critical path information Claude can't infer, it's a cost with no return.
@@ -199,13 +229,15 @@ Keep this lean. One directive per line where possible. Point to files rather tha
 
 Also produce:
 - `.claude/rules/` directory — scoped context files with glob patterns for file-type or workflow-specific instructions that don't apply every session
-- `CONTEXT/` directory — reference files the agent should always load
+- `CONTEXT/` directory — the agent's understanding of the codebase, not copies of source code. Architecture relationships, module boundaries, data flow, integration points. If it can be read from a file, point to the file instead.
+- `CONTEXT/decisions.md` — append-only log of architectural and convention decisions with rationale. Never summarized, never pruned. The "why" behind choices is the context most vulnerable to loss over time. Format: `[date] [decision] — [why]`
 - `ENVIRONMENT.md` — only if hosting, auth, or integrations have notable complexity
 
 When deciding what goes where:
 - CLAUDE.md → universal, every-session rules (under 200 lines)
 - `.claude/rules/*.md` → conditional rules activated by glob patterns (zero cost when not relevant)
-- `CONTEXT/` → reference material too large for inline inclusion
+- `CONTEXT/` → agent's understanding of architecture and relationships (not reproduced source code)
+- `CONTEXT/decisions.md` → append-only decision log preserving "why" (never compressed)
 
 **Advance:** `"ready"` → Phase 3
 
@@ -352,7 +384,8 @@ Work through in order. Confirm each section before moving to the next.
 ├── .claude/
 │   └── rules/                ← Scoped context (glob-activated, zero cost when inactive)
 │       └── [pattern-name].md
-├── CONTEXT/                  ← Reference docs (pointed to, not inlined)
+├── CONTEXT/                  ← Agent's understanding of the codebase (not reproduced source)
+│   └── decisions.md          ← Append-only decision log (never summarized)
 ├── SPECS/                    ← Agent-executable specifications
 │   └── [task-name].md
 ├── profiles/                 ← Behavior profiles (if worktrees enabled)
@@ -393,6 +426,14 @@ Based on `INTENT.md` and the context best practices, create:
 - Custom rule files per project conventions
 
 When creating scoped rules, each file should specify its glob pattern and contain only the instructions relevant to that file pattern. This keeps CLAUDE.md lean and avoids loading irrelevant context.
+
+**Task-phase rules:** Different work modes need different context. Consider creating rules scoped to task phase, not just file type:
+- **Exploring/understanding** → architecture map, dependency graph, module boundaries. Useful when the agent is reading code it hasn't seen before.
+- **Implementing** → conventions, patterns, interface contracts, active file neighbors. Useful when the agent is writing new code.
+- **Debugging** → error patterns from `LOGS/errors/`, known failure modes from specs, relevant test fixtures. Useful when the agent is diagnosing failures.
+- **Reviewing** → quality bars from specs, convention checklist, common mistakes from `CONTEXT/decisions.md`.
+
+These can be activated by naming convention (e.g., specs named `debug-*.md` or `review-*.md`) or by explicit instruction in the relevant spec's process steps.
 
 ### 5E — Install Runtime
 
@@ -609,6 +650,8 @@ What causes this task to start?
 
 ## Phase 7 — Verify and Launch
 
+### Structural Verification
+
 - [ ] `PROJECT_BRIEF.md` is accurate and complete
 - [ ] `CLAUDE.md` is under 200 lines, contains only universal rules
 - [ ] `CLAUDE.md` has no formatting/style rules that belong in tooling
@@ -617,17 +660,31 @@ What causes this task to start?
 - [ ] `INTENT.md` covers known edge cases and trade-offs
 - [ ] Friction threshold is clearly defined in `INTENT.md`
 - [ ] `SPEC_INVENTORY.md` is complete and prioritized
+- [ ] `CONTEXT/decisions.md` exists (may be empty for greenfield)
 - [ ] All Phase 5 dependencies installed and tested
 - [ ] All MCP connections live and smoke-tested
 - [ ] `RUNTIME.md` is present in repo root
 - [ ] `IMPROVEMENT_QUEUE.md` exists (empty is fine)
 - [ ] `LOGS/sessions/` and `LOGS/errors/` directories exist
-- [ ] At least one spec tested end-to-end with a real agent run
-- [ ] Agent completed a full task without asking clarifying questions
 - [ ] *(If worktrees)* All profiles have `CLAUDE.md` and `INTENT.md` in `profiles/[name]/`
 - [ ] *(If worktrees)* `WORKTREES.md` exists at repo root and accurately reflects all profiles
-- [ ] *(If worktrees)* Each profile smoke-tested with a real agent run in its worktree
 - [ ] *(If worktrees)* `SPEC_INVENTORY.md` notes which specs belong to which profile
+
+### Behavioral Verification
+
+An agent that asks itself "do I understand this codebase?" says yes regardless. Verify through execution instead.
+
+- [ ] Run a small real task (a bug fix, a test, or a minor feature) end-to-end using only the onboarded context
+- [ ] Agent completed the task without asking clarifying questions covered by existing artifacts
+- [ ] Agent followed extracted conventions without being reminded (check the output against Stage 2 conventions)
+- [ ] Agent used the correct paths, tools, and patterns from CLAUDE.md without hallucinating alternatives
+- [ ] If the agent violated a convention or used a wrong path, update the relevant artifact and re-test
+- [ ] *(If worktrees)* Each profile smoke-tested with a real agent run in its worktree
+
+### Reconciliation Check
+
+- [ ] Run one reconciliation pass: compare CLAUDE.md Key Paths against actual file structure
+- [ ] Verify CONTEXT/ files describe the current state of the code, not a stale snapshot
 
 Any unchecked box: return to the relevant phase and fix.
 
@@ -696,7 +753,8 @@ When triggered manually or at natural task completion checkpoints:
 2. Review any new error logs
 3. Evaluate against friction threshold in `INTENT.md`
 4. Generate proposals for anything that meets the threshold
-5. Report to user: *"Reflected on [N] tasks. Generated [N] proposals. Use *review to see them."*
+5. Run context reconciliation — compare CLAUDE.md paths, CONTEXT/ descriptions, and `.claude/rules/` globs against actual codebase. Generate proposals for any drift. Never patch a stale summary from another summary — regenerate from the code.
+6. Report to user: *"Reflected on [N] tasks. Generated [N] proposals. Use *review to see them."*
 
 ## *review Command
 
@@ -706,8 +764,9 @@ When triggered:
 3. For each proposal, present with a recommended action
 4. Accept user decision: approve / reject / modify
 5. On approval: apply the change, update status, increment spec version
-6. On rejection: update status with reason
-7. On modify: user edits inline, agent applies modified version
+6. On approval of convention/architecture changes: append to `CONTEXT/decisions.md` with date, decision, and rationale
+7. On rejection: update status with reason
+8. On modify: user edits inline, agent applies modified version
 
 **⚠️ INTENT.md proposals require explicit `APPROVE INTENT CHANGE` confirmation.**
 

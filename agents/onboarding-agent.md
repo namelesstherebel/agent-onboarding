@@ -35,10 +35,12 @@ Every line in a context file pays rent from the context window budget. Apply the
 
 - **Under 200 lines** for CLAUDE.md. Universal rules only.
 - **Corrections over instructions.** Prioritize what Claude gets wrong, not what it already does right.
+- **Understanding over code.** CONTEXT/ files hold the agent's understanding *about* the code — relationships, conventions, rationale — not reproduced source. The filesystem is infinite memory.
 - **Pointers over content.** File paths and search directives, not reproduced content.
 - **One directive per line.** If it takes a paragraph, sharpen it.
 - **Scope conditional rules** to `.claude/rules/` with glob patterns — zero context cost when irrelevant.
 - **Never duplicate tooling.** Formatting and style rules belong in linters/formatters, not context files.
+- **Never summarize summaries.** When context artifacts drift, regenerate from the actual codebase — never patch a summary from another summary.
 - **Prune actively.** When the self-improvement loop adds instructions, also look for instructions to remove. Context files accumulate; the discipline is pruning.
 
 ## Onboarding Workflow

@@ -270,6 +270,61 @@ Context artifacts drift as the codebase evolves. Never summarize summaries — e
 - CLAUDE.md growing past 200 lines
 - Conditional instructions accumulating in CLAUDE.md instead of `.claude/rules/`
 - Style/formatting rules in context files instead of tooling
+- Specs with 3+ friction events of the same type — candidate for harness hardening (see below)
+
+---
+
+## Friction-to-Harness Escalation
+
+When the same friction type hits **3 or more times** on the same spec, the problem has outgrown spec-level fixes. Revising the spec again won't help — the agent is drifting from instructions, not missing them.
+
+**Detection:** During `*reflect` or task completion, check friction logs and `IMPROVEMENT_QUEUE.md` history. If a spec has:
+- 3+ proposals targeting the same friction type (e.g., repeated "skipped verification step")
+- 3+ error logs with the same root cause pattern
+- 2+ rejected proposals that attempted spec-level fixes for the same issue
+
+Then generate a **harness escalation proposal** instead of another spec revision.
+
+**Harness escalation proposal format:**
+
+```
+---
+## Proposal [YYYY-MM-DD-NNN]
+**Status:** PENDING
+**Generated:** [timestamp]
+**Triggered by:** HARNESS_ESCALATION
+**Task:** [spec being executed]
+**Friction type:** Repeated [type] — spec-level fixes insufficient
+
+### Pattern
+[N] friction events of type [X] on spec [Y] across [N] sessions.
+Previous spec revisions have not resolved the drift.
+
+### Root Cause
+[Why the spec alone can't prevent this — e.g., "agent can't programmatically verify visual output", "closure steps are easy to skip under time pressure", "context loading depends on agent remembering to read files"]
+
+### Recommended Harness Gate
+**Type:** [Pre-flight / Validation / Visual verification / Closure validator / Test gate / Approval gate]
+**Implementation:** [Specific script to build — what it checks, where it runs, what it blocks]
+**Integration point:** [Which spec step this gate replaces or augments]
+
+### Why a Harness Gate Fixes This
+[One or two sentences — code-enforced gates remove the possibility of drift because the check is programmatic, not prompt-dependent]
+
+### Confidence
+[HIGH / MEDIUM / LOW]
+
+### Requires Human Decision
+YES
+---
+```
+
+**Rules:**
+- Harness escalation proposals always require human decision — never auto-apply
+- The proposal should recommend the simplest gate type that addresses the pattern
+- Prefer shell scripts over Python; prefer standalone scripts over framework dependencies
+- Gate scripts go in `scripts/` or `harness/` directory and are referenced in the spec's process steps
+- After a harness gate is approved and built, reset the friction counter for that spec
 
 ---
 

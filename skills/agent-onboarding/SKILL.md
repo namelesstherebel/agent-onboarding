@@ -320,7 +320,7 @@ Generate an improvement proposal when:
 
 ## Phase 4 — Specification Readiness
 
-**Goal:** Inventory all recurring tasks. Identify what needs to be written as agent-executable specs.
+**Goal:** Inventory all recurring tasks. Identify what needs specs — and what needs harness gates.
 
 For existing repos: look for existing runbooks, READMEs with process steps, Makefile targets, CI/CD configs. These are proto-specs — they just need to be formalized.
 
@@ -333,6 +333,35 @@ For existing repos: look for existing runbooks, READMEs with process steps, Make
 5. Are there approval gates — human sign-off before continuing?
 6. (Existing repos) What processes exist only in someone's head?
 
+### Harness Assessment
+
+After inventorying tasks, evaluate each for harness-worthiness. Not every task needs code-enforced gates — most are fine as specs. But some tasks have failure modes that prompts and specs can't reliably prevent.
+
+**A task qualifies for harness recommendation when any of these are true:**
+
+1. **5+ sequential steps** where failure in one corrupts downstream steps
+2. **High failure cost** — production data, client-facing output, financial impact, compliance/legal exposure
+3. **Repeated agent drift** — the agent has historically skipped steps, marked tasks done prematurely, or violated the process despite clear spec instructions
+4. **Verification dependency** — correctness requires programmatic checking (test suites, schema validation, visual diff) that the agent can't reliably self-assess
+5. **Knowledge distribution required** — the system doesn't learn unless specific post-task steps happen (closing gates, knowledge base updates, log distribution)
+
+For each qualifying task, assess using the **March of Nines** lens:
+- How many sequential steps does this workflow have?
+- What's the approximate per-step reliability with a spec alone?
+- What's the compounding failure rate? (p^n where p = per-step rate, n = step count)
+- What specific gates would move it from spec-level to harness-level reliability?
+
+**Harness gate types to recommend:**
+
+| Gate Type | What It Does | When to Recommend |
+|---|---|---|
+| **Pre-flight** | Script that auto-loads required context/files before task starts | Agent frequently starts tasks without full context |
+| **Validation gate** | Script that checks output meets criteria before allowing next phase | Outputs have structured requirements (schema, format, completeness) |
+| **Visual verification** | Automated screenshot/diff with human approval | CSS, layout, or design tasks where the agent can't judge correctness |
+| **Closure validator** | Script that checks all post-task steps were completed | Knowledge distribution, logging, or cleanup steps get skipped |
+| **Test gate** | Script that runs relevant tests and blocks on failure | Code changes that must pass tests before merging |
+| **Approval gate** | Programmatic pause requiring explicit human sign-off | Destructive actions, external communications, production deployments |
+
 **Produce `SPEC_INVENTORY.md`:**
 
 ```markdown
@@ -342,15 +371,29 @@ For existing repos: look for existing runbooks, READMEs with process steps, Make
 
 ## Recurring Tasks
 
-| Task | Spec Exists? | Quality Bar Defined? | Multi-Session? | Priority |
-|------|-------------|---------------------|----------------|----------|
-| [Task 1] | No | No | No | High |
-| [Task 2] | Partial | Yes | Yes | Medium |
+| Task | Spec Exists? | Quality Bar Defined? | Multi-Session? | Harness? | Priority |
+|------|-------------|---------------------|----------------|----------|----------|
+| [Task 1] | No | No | No | No | High |
+| [Task 2] | Partial | Yes | Yes | **Yes** | Medium |
 
 ## Phase 6 Queue (write in this order)
 1. [Spec name] — [what it covers]
 2. [Spec name]
 3. [Spec name]
+
+## Harness Assessment
+
+### Tasks Requiring Harness Gates
+
+| Task | Steps | Est. Per-Step Rate | Compounding Rate | Failure Cost | Recommended Gates |
+|------|-------|--------------------|------------------|--------------|-------------------|
+| [Task] | [N] | [%] | [p^n] | [High/Critical] | [Gate types] |
+
+### Tasks Where Specs Are Sufficient
+[List tasks assessed but not needing harness gates, with brief rationale]
+
+### Recommended Harness Artifacts
+[For each task needing gates: what scripts/validators to build, where they integrate into the workflow]
 
 ## Existing Runbooks to Formalize (Existing Repos)
 - [Doc/file name] → [spec it should become]
@@ -358,6 +401,17 @@ For existing repos: look for existing runbooks, READMEs with process steps, Make
 ## Notes
 [Anything notable about the spec landscape]
 ```
+
+If the harness assessment identifies tasks needing gates, build those gate scripts during Phase 5. Add sub-step **5G — Harness Gates** after the smoke test:
+
+### 5G — Harness Gates *(if harness assessment identified qualifying tasks)*
+
+For each task with recommended harness gates:
+1. Build the gate script (shell preferred, Python if needed)
+2. Place in `scripts/` or `harness/` directory
+3. Document in `CLAUDE.md` under a Harness Gates section
+4. Reference in the relevant spec's process steps — the spec should call the gate script at the appropriate point
+5. Smoke test each gate script independently
 
 **Advance:** `"ready"` → Phase 5
 

@@ -26,6 +26,11 @@ Read the environment artifacts and generate a health report:
 - Style rules in context files (should be 0): [N]
 - Instructions Claude follows without being told (candidates for removal): [N]
 
+## Harness Coverage
+- Tasks assessed for harness gates: [N]
+- Tasks with harness gates: [N]
+- Specs with 3+ repeated friction (harness candidates): [N]
+
 ## Recent Activity
 - Last agent task: [date + task name]
 - Last proposal generated: [date]
@@ -36,11 +41,12 @@ Read the environment artifacts and generate a health report:
 - [Any specs that haven't been updated despite repeated friction]
 - [Any error patterns that haven't been addressed]
 - [Any INTENT.md proposals pending > 7 days]
+- [Any specs with 3+ repeated friction of the same type — harness escalation candidates]
 ```
 
 ## Data Sources
 
-- `SPEC_INVENTORY.md` — for task count and spec coverage
+- `SPEC_INVENTORY.md` — for task count, spec coverage, and harness assessment data
 - `SPECS/*.md` — for version numbers and last-updated dates
 - `IMPROVEMENT_QUEUE.md` — for proposal counts and statuses
 - `LOGS/sessions/` — for last agent task activity
@@ -60,6 +66,8 @@ Flag these conditions when detected:
 - **Misplaced rules** — conditional/file-specific instructions in `CLAUDE.md` instead of `.claude/rules/`
 - **Tooling duplication** — style or formatting rules in context files instead of linter/formatter configs
 - **Stale instructions** — directives Claude follows correctly without being told (wasted context budget)
+- **Harness candidates** — specs with 3+ friction events of the same type that have not been escalated to harness gates
+- **Unbuilt harness gates** — tasks marked as needing harness gates in `SPEC_INVENTORY.md` that don't have corresponding scripts in `scripts/` or `harness/`
 
 ## If Environment Is Not Onboarded
 
